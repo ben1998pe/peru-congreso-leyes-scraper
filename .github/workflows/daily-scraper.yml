@@ -1,0 +1,88 @@
+name: Daily Scraper - Congreso del Perú
+
+on:
+  schedule:
+    # Ejecutar todos los días a las 6:00 AM UTC (1:00 AM hora de Perú)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Permite ejecución manual
+
+jobs:
+  scrape-and-commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install webdriver-manager
+    
+    - name: Install Chrome
+      run: |
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+    
+    - name: Run scraper
+      run: |
+        python -c "
+        from scraper_mejorado import CongresoScraper
+        from datetime import datetime, timedelta
+        import os
+        
+        # Configurar fechas (últimos 7 días)
+        fecha_hasta = datetime.now()
+        fecha_desde = fecha_hasta - timedelta(days=7)
+        
+        fecha_desde_str = fecha_desde.strftime('%d/%m/%Y')
+        fecha_hasta_str = fecha_hasta.strftime('%d/%m/%Y')
+        
+        print(f'Iniciando scraping: {fecha_desde_str} - {fecha_hasta_str}')
+        
+        scraper = CongresoScraper(headless=True)
+        try:
+            proyectos = scraper.scrape(fecha_desde_str, fecha_hasta_str)
+            if proyectos:
+                archivo = scraper.save_to_csv(proyectos)
+                print(f'Datos guardados en: {archivo}')
+            else:
+                print('No se encontraron proyectos')
+        finally:
+            scraper.close()
+        "
+    
+    - name: Check for changes
+      id: verify-changed-files
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Commit and push changes
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/
+        git commit -m "🤖 Auto-update: Datos del $(date '+%d/%m/%Y')"
+        git push
+    
+    - name: Create summary
+      run: |
+        echo "## 📊 Resumen del Scraping Diario" >> $GITHUB_STEP_SUMMARY
+        echo "**Fecha:** $(date '+%d/%m/%Y %H:%M')" >> $GITHUB_STEP_SUMMARY
+        echo "**Archivos modificados:**" >> $GITHUB_STEP_SUMMARY
+        git status --porcelain >> $GITHUB_STEP_SUMMARY
