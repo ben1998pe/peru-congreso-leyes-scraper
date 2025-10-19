@@ -22,6 +22,8 @@ help:
 	@echo "  clean-data     Clean existing data files"
 	@echo "  validate       Validate data quality"
 	@echo "  analyze        Analyze scraped data"
+	@echo "  analyze-complete Run complete analysis pipeline"
+	@echo "  health-check    Run project health check"
 	@echo "  monitor        Monitor system performance"
 	@echo "  docs           Generate documentation"
 	@echo "  setup-git      Setup git hooks and configuration"
@@ -106,6 +108,14 @@ analyze:
 		exit 1; \
 	fi
 	python cli.py analyze --input data/proyectos_ley_*.csv --format html
+
+analyze-complete:
+	@echo "📊 Running complete analysis..."
+	python scripts/run_analysis.py
+
+health-check:
+	@echo "🏥 Running project health check..."
+	python scripts/health_check.py
 
 # Monitoring
 monitor:

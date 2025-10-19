@@ -126,6 +126,15 @@ make scrape
 make test
 ```
 
+### 7. Configuración de entorno (Opcional)
+```bash
+# Copiar archivo de configuración de ejemplo
+cp environment.example .env
+
+# Editar configuración según necesidades
+# nano .env
+```
+
 ## 📖 Guía de Uso
 
 ### Uso Básico
@@ -214,11 +223,23 @@ python cli.py config          # Ver configuración actual
 
 ### 🔧 Automatización (`Makefile`)
 ```bash
-make dev-setup    # Configuración completa del entorno
-make test         # Ejecutar todas las pruebas
-make quality      # Verificaciones de calidad de código
-make pipeline     # Pipeline completo de datos
+make dev-setup         # Configuración completa del entorno
+make test              # Ejecutar todas las pruebas
+make quality           # Verificaciones de calidad de código
+make pipeline          # Pipeline completo de datos
+make analyze-complete  # Análisis completo automatizado
+make health-check      # Verificación de salud del proyecto
 ```
+
+### 📊 Scripts de Análisis (`scripts/`)
+- **`run_analysis.py`**: Análisis completo automatizado con exportación de resultados
+- **`health_check.py`**: Verificación de salud del proyecto y estructura
+
+### 📓 Notebook Mejorado (`notebooks/analisis.ipynb`)
+- **Validación automática**: Verificación de calidad de datos integrada
+- **Exportación avanzada**: Generación automática de reportes HTML y JSON
+- **Análisis interactivo**: Visualizaciones mejoradas con Plotly
+- **Reportes automáticos**: Generación de reportes HTML profesionales
 
 ## 📊 Funcionalidades del Scraper Mejorado
 
