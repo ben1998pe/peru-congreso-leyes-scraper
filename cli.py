@@ -16,6 +16,7 @@ from utils.data_validator import DataValidator
 from utils.limpieza import DataCleaner, limpiar_archivo_csv
 from utils.logging_config import get_logger
 from utils.performance_monitor import PerformanceMonitor
+from utils.notifications import get_notification_manager
 from config.environment import env
 
 
@@ -92,6 +93,17 @@ Examples:
         # Config command
         config_parser = subparsers.add_parser('config', help='Show configuration')
         config_parser.add_argument('--format', choices=['json', 'yaml'], default='json', help='Output format')
+        
+        # Dashboard command
+        dashboard_parser = subparsers.add_parser('dashboard', help='Generate dashboard')
+        dashboard_parser.add_argument('--output', '-o', type=str, help='Output HTML file')
+        dashboard_parser.add_argument('--console', action='store_true', help='Show dashboard in console')
+        
+        # Notifications command
+        notify_parser = subparsers.add_parser('notify', help='Manage notifications')
+        notify_parser.add_argument('--test', action='store_true', help='Test notifications')
+        notify_parser.add_argument('--enable', action='store_true', help='Enable notifications')
+        notify_parser.add_argument('--disable', action='store_true', help='Disable notifications')
     
     def run(self, args=None):
         """Run the CLI"""
@@ -117,6 +129,10 @@ Examples:
                 return self.handle_monitor(parsed_args)
             elif parsed_args.command == 'config':
                 return self.handle_config(parsed_args)
+            elif parsed_args.command == 'dashboard':
+                return self.handle_dashboard(parsed_args)
+            elif parsed_args.command == 'notify':
+                return self.handle_notifications(parsed_args)
             else:
                 self.logger.error(f"Unknown command: {parsed_args.command}")
                 return 1
@@ -356,6 +372,70 @@ Examples:
             print(yaml.dump(config_dict, default_flow_style=False))
         
         return 0
+    
+    def handle_dashboard(self, args):
+        """Handle dashboard command"""
+        from dashboard import ScraperDashboard
+        
+        self.logger.info("📊 Generando dashboard...")
+        
+        dashboard = ScraperDashboard()
+        
+        if args.console:
+            dashboard.print_dashboard()
+        else:
+            html_file = dashboard.generate_dashboard_html(args.output)
+            self.logger.info(f"✅ Dashboard HTML generado: {html_file}")
+        
+        return 0
+    
+    def handle_notifications(self, args):
+        """Handle notifications command"""
+        notification_manager = get_notification_manager()
+        
+        if args.test:
+            self.logger.info("🧪 Probando notificaciones...")
+            results = notification_manager.test_notifications()
+            
+            self.logger.info("📊 Resultados de prueba:")
+            for channel, success in results.items():
+                status = "✅" if success else "❌"
+                self.logger.info(f"   {status} {channel}")
+            
+            return 0 if all(results.values()) else 1
+        
+        elif args.enable:
+            self.logger.info("🔔 Habilitando notificaciones...")
+            # Aquí podrías agregar lógica para habilitar notificaciones
+            self.logger.info("💡 Configure las notificaciones en config/notifications.json")
+            return 0
+        
+        elif args.disable:
+            self.logger.info("🔕 Deshabilitando notificaciones...")
+            # Aquí podrías agregar lógica para deshabilitar notificaciones
+            self.logger.info("💡 Modifique config/notifications.json para deshabilitar")
+            return 0
+        
+        else:
+            # Mostrar estado de notificaciones
+            status = "habilitadas" if notification_manager.enabled else "deshabilitadas"
+            self.logger.info(f"📧 Estado de notificaciones: {status}")
+            
+            if notification_manager.enabled:
+                channels = []
+                if notification_manager.config['email']['enabled']:
+                    channels.append("Email")
+                if notification_manager.config['slack']['enabled']:
+                    channels.append("Slack")
+                if notification_manager.config['telegram']['enabled']:
+                    channels.append("Telegram")
+                
+                if channels:
+                    self.logger.info(f"📱 Canales activos: {', '.join(channels)}")
+                else:
+                    self.logger.info("⚠️ No hay canales configurados")
+            
+            return 0
     
     def _generate_html_report(self, resumen, output_file):
         """Generate HTML analysis report"""

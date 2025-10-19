@@ -135,6 +135,24 @@ cp environment.example .env
 # nano .env
 ```
 
+### 8. Configurar notificaciones (Opcional)
+```bash
+# Editar configuración de notificaciones
+nano config/notifications.json
+
+# Probar notificaciones
+python cli.py notify --test
+```
+
+### 9. Usar el dashboard
+```bash
+# Ver dashboard en consola
+make dashboard
+
+# Generar dashboard HTML
+make dashboard-html
+```
+
 ## 📖 Guía de Uso
 
 ### Uso Básico
@@ -229,6 +247,9 @@ make quality           # Verificaciones de calidad de código
 make pipeline          # Pipeline completo de datos
 make analyze-complete  # Análisis completo automatizado
 make health-check      # Verificación de salud del proyecto
+make dashboard         # Mostrar dashboard en consola
+make dashboard-html    # Generar dashboard HTML
+make notify-test       # Probar sistema de notificaciones
 ```
 
 ### 📊 Scripts de Análisis (`scripts/`)
@@ -240,6 +261,18 @@ make health-check      # Verificación de salud del proyecto
 - **Exportación avanzada**: Generación automática de reportes HTML y JSON
 - **Análisis interactivo**: Visualizaciones mejoradas con Plotly
 - **Reportes automáticos**: Generación de reportes HTML profesionales
+
+### 🔔 Sistema de Notificaciones (`utils/notifications.py`)
+- **Múltiples canales**: Email, Slack, Telegram
+- **Notificaciones automáticas**: Inicio, finalización y errores de scraping
+- **Configuración flexible**: JSON configuración para diferentes canales
+- **Pruebas integradas**: Sistema de testing de notificaciones
+
+### 📊 Dashboard de Monitoreo (`dashboard.py`)
+- **Estado en tiempo real**: Monitoreo del estado del proyecto
+- **Métricas visuales**: Estadísticas de datos y rendimiento
+- **Dashboard HTML**: Interfaz web interactiva con auto-actualización
+- **Logs en vivo**: Visualización de logs recientes con colores
 
 ## 📊 Funcionalidades del Scraper Mejorado
 

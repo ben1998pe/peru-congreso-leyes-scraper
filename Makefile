@@ -24,6 +24,9 @@ help:
 	@echo "  analyze        Analyze scraped data"
 	@echo "  analyze-complete Run complete analysis pipeline"
 	@echo "  health-check    Run project health check"
+	@echo "  dashboard       Show dashboard in console"
+	@echo "  dashboard-html  Generate HTML dashboard"
+	@echo "  notify-test     Test notification system"
 	@echo "  monitor        Monitor system performance"
 	@echo "  docs           Generate documentation"
 	@echo "  setup-git      Setup git hooks and configuration"
@@ -116,6 +119,18 @@ analyze-complete:
 health-check:
 	@echo "🏥 Running project health check..."
 	python scripts/health_check.py
+
+dashboard:
+	@echo "📊 Generating dashboard..."
+	python cli.py dashboard --console
+
+dashboard-html:
+	@echo "📊 Generating HTML dashboard..."
+	python cli.py dashboard
+
+notify-test:
+	@echo "🔔 Testing notifications..."
+	python cli.py notify --test
 
 # Monitoring
 monitor:

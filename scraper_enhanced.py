@@ -28,6 +28,7 @@ from urllib.parse import urljoin, urlparse
 from utils.logging_config import get_logger, log_execution_time, PerformanceProfiler
 from utils.data_validator import DataValidator
 from utils.performance_monitor import PerformanceMonitor
+from utils.notifications import get_notification_manager
 from config.environment import env
 
 
@@ -46,6 +47,7 @@ class EnhancedCongresoScraper:
         self.wait = None
         self.validator = DataValidator()
         self.performance_monitor = PerformanceMonitor() if enable_monitoring else None
+        self.notification_manager = get_notification_manager()
         
         # Configuration
         self.base_url = "https://wb2server.congreso.gob.pe/spley-portal/#/expediente/search"
@@ -234,8 +236,12 @@ class EnhancedCongresoScraper:
             
             self.logger.info(f"🚀 Starting enhanced scraping: {fecha_desde} - {fecha_hasta}")
             
+            # Notificar inicio de scraping
+            self.notification_manager.notify_scraping_start((fecha_desde, fecha_hasta))
+            
             # Navigate to page
             if not self._safe_navigate(self.base_url):
+                self.notification_manager.notify_scraping_error("Error navegando a la página")
                 return []
             
             self._wait_for_page_load()
@@ -262,6 +268,12 @@ class EnhancedCongresoScraper:
             self.stats['end_time'] = datetime.now()
             self.stats['projects_found'] = len(proyectos)
             
+            # Notificar finalización de scraping
+            duration = (self.stats['end_time'] - self.stats['start_time']).total_seconds()
+            self.notification_manager.notify_scraping_complete(
+                len(proyectos), duration, self.stats['errors_encountered']
+            )
+            
             self.logger.info(f"✅ Scraping completed: {len(proyectos)} projects found")
             
             return proyectos
@@ -269,6 +281,7 @@ class EnhancedCongresoScraper:
         except Exception as e:
             self.logger.error(f"❌ Critical error in scraping: {e}")
             self.stats['errors_encountered'] += 1
+            self.notification_manager.notify_scraping_error(str(e))
             return []
         
         finally:
