@@ -1,15 +1,24 @@
 # 📜 Scraper de Proyectos de Ley - Congreso del Perú 🇵🇪
 
+[![CI/CD](https://github.com/ben1998pe/peru-congreso-leyes-scraper/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/ben1998pe/peru-congreso-leyes-scraper/actions)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://python.org)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 Este proyecto extrae, limpia y analiza datos de los proyectos de ley presentados en el Congreso del Perú desde su plataforma oficial: [https://wb2server.congreso.gob.pe/spley-portal/#/expediente/search](https://wb2server.congreso.gob.pe/spley-portal/#/expediente/search)
 
 ## 🚀 Características Principales
 
-- **Web Scraping Avanzado**: Extracción automática con Selenium y BeautifulSoup
-- **Limpieza de Datos**: Normalización y enriquecimiento de información
-- **Análisis Exploratorio**: Visualizaciones interactivas con Plotly
-- **Configuración Flexible**: Rango de fechas personalizable y paginación automática
-- **Logging Completo**: Monitoreo y debugging detallado
-- **Exportación Múltiple**: CSV, análisis y reportes automáticos
+### ✨ Versión 2.0 - Mejorada
+- **🚀 Scraping Avanzado**: Extracción automática con Selenium y BeautifulSoup con manejo robusto de errores
+- **🔍 Validación de Datos**: Sistema completo de validación y limpieza de datos
+- **📊 Monitoreo de Rendimiento**: Seguimiento en tiempo real del rendimiento del sistema
+- **🛠️ CLI Completa**: Interfaz de línea de comandos para todas las operaciones
+- **🧪 Suite de Pruebas**: Cobertura completa de pruebas unitarias e integración
+- **📈 Análisis Avanzado**: Visualizaciones interactivas y reportes detallados
+- **🔧 Configuración Flexible**: Sistema de configuración centralizado y personalizable
+- **📝 Logging Mejorado**: Sistema de logging avanzado con rotación de archivos
+- **🚀 CI/CD**: Pipeline automatizado de integración y despliegue continuo
 
 ## 🛠 Tecnologías Utilizadas
 
@@ -35,22 +44,36 @@ Este proyecto extrae, limpia y analiza datos de los proyectos de ley presentados
 
 ```
 peru-congreso-leyes-scraper/
-├── 📄 scraper.py              # Scraper original (básico)
-├── 📄 scraper_mejorado.py     # Scraper mejorado con todas las funcionalidades
-├── 📄 config.py               # Configuración centralizada
-├── 📄 ejemplo_uso.py          # Ejemplos de uso y menú interactivo
-├── 📄 requirements.txt        # Dependencias del proyecto
-├── 📁 data/                   # Datos extraídos (CSV)
+├── 📄 scraper.py                    # Scraper original (básico)
+├── 📄 scraper_mejorado.py           # Scraper mejorado (v1.0)
+├── 📄 scraper_enhanced.py           # Scraper mejorado v2.0 con validación y monitoreo
+├── 📄 cli.py                        # Interfaz de línea de comandos
+├── 📄 config.py                     # Configuración centralizada
+├── 📄 ejemplo_uso.py                # Ejemplos de uso y menú interactivo
+├── 📄 requirements.txt              # Dependencias del proyecto
+├── 📄 setup.py                      # Script de instalación
+├── 📄 Makefile                      # Comandos de automatización
+├── 📁 config/                       # Configuración avanzada
+│   └── environment.py               # Gestión de configuración por entorno
+├── 📁 utils/                        # Utilidades mejoradas
+│   ├── limpieza.py                  # Limpieza de datos
+│   ├── logging_config.py            # Configuración de logging
+│   ├── data_validator.py            # Validación de datos
+│   └── performance_monitor.py       # Monitoreo de rendimiento
+├── 📁 tests/                        # Suite de pruebas
+│   └── test_scraper.py              # Pruebas unitarias e integración
+├── 📁 .github/                      # Configuración de GitHub
+│   └── workflows/
+│       └── ci.yml                   # Pipeline de CI/CD
+├── 📁 data/                         # Datos extraídos (CSV)
 │   ├── proyectos_ley_*.csv
 │   └── proyectos_ley_limpios_*.csv
-├── 📁 notebooks/              # Análisis exploratorio
+├── 📁 notebooks/                    # Análisis exploratorio
 │   └── analisis.ipynb
-├── 📁 utils/                  # Funciones auxiliares
-│   └── limpieza.py
-├── 📁 analysis/               # Reportes y análisis
-├── 📁 visualizations/         # Gráficos exportados
-├── 📁 logs/                   # Archivos de log
-└── 📄 chromedriver.exe        # Driver de Chrome
+├── 📁 analysis/                     # Reportes y análisis
+├── 📁 visualizations/               # Gráficos exportados
+├── 📁 logs/                         # Archivos de log
+└── 📄 chromedriver.exe              # Driver de Chrome
 ```
 
 ## 🚀 Instalación y Configuración
@@ -74,6 +97,33 @@ pip install -r requirements.txt
 ### 4. Ejecutar ejemplo básico
 ```bash
 python ejemplo_uso.py
+```
+
+### 5. Usar la CLI mejorada (Recomendado)
+```bash
+# Scraping básico
+python cli.py scrape
+
+# Scraping con fechas personalizadas
+python cli.py scrape --fecha-desde "01/01/2024" --fecha-hasta "31/01/2024"
+
+# Ver todas las opciones
+python cli.py --help
+```
+
+### 6. Usar Makefile para automatización
+```bash
+# Ver todas las opciones disponibles
+make help
+
+# Configuración completa del entorno de desarrollo
+make dev-setup
+
+# Ejecutar scraping
+make scrape
+
+# Ejecutar pruebas
+make test
 ```
 
 ## 📖 Guía de Uso
@@ -122,6 +172,52 @@ archivo_limpio = limpiar_archivo_csv("data/proyectos_ley_2025-06-05.csv")
 cleaner = DataCleaner()
 df_limpio = cleaner.limpiar_dataframe(df_raw)
 resumen = cleaner.generar_resumen(df_limpio)
+```
+
+## 🆕 Nuevas Funcionalidades v2.0
+
+### 🚀 Scraper Mejorado (`scraper_enhanced.py`)
+- **Manejo Robusto de Errores**: Sistema avanzado de reintentos y recuperación de errores
+- **Validación de Datos**: Validación automática de todos los datos extraídos
+- **Monitoreo de Rendimiento**: Seguimiento en tiempo real del rendimiento del sistema
+- **Logging Avanzado**: Sistema de logging con rotación de archivos y colores
+- **Múltiples Selectores**: Fallbacks automáticos para elementos de la página web
+
+### 🛠️ CLI Completa (`cli.py`)
+```bash
+# Comandos disponibles
+python cli.py scrape          # Scraping con opciones avanzadas
+python cli.py clean           # Limpieza de datos
+python cli.py validate        # Validación de calidad de datos
+python cli.py analyze         # Análisis completo de datos
+python cli.py monitor         # Monitoreo de rendimiento
+python cli.py config          # Ver configuración actual
+```
+
+### 🔍 Sistema de Validación (`utils/data_validator.py`)
+- **Validación de Campos**: Verificación automática de formato y contenido
+- **Detección de Anomalías**: Identificación de datos inconsistentes
+- **Reportes de Validación**: Informes detallados de calidad de datos
+- **Modo Estricto**: Validación más estricta para datos críticos
+
+### 📊 Monitoreo de Rendimiento (`utils/performance_monitor.py`)
+- **Métricas del Sistema**: CPU, memoria, disco, red
+- **Alertas Automáticas**: Notificaciones cuando se exceden umbrales
+- **Exportación de Datos**: Exportación de métricas a JSON
+- **Profiling de Código**: Medición de tiempo de ejecución de funciones
+
+### 🧪 Suite de Pruebas (`tests/`)
+- **Pruebas Unitarias**: Cobertura completa de todas las funciones
+- **Pruebas de Integración**: Verificación de flujos completos
+- **Pruebas Parametrizadas**: Múltiples casos de prueba con datos variados
+- **Mocks y Fixtures**: Simulación de dependencias externas
+
+### 🔧 Automatización (`Makefile`)
+```bash
+make dev-setup    # Configuración completa del entorno
+make test         # Ejecutar todas las pruebas
+make quality      # Verificaciones de calidad de código
+make pipeline     # Pipeline completo de datos
 ```
 
 ## 📊 Funcionalidades del Scraper Mejorado
