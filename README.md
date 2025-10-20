@@ -218,6 +218,27 @@ resumen = cleaner.generar_resumen(df_limpio)
 - **Dashboard de Métricas**: Visualización en tiempo real del estado del sistema
 - **Exportación Avanzada**: Reportes en JSON, HTML y CSV para análisis externos
 
+### 🚨 Sistema de Alertas Inteligentes
+- **Umbrales Configurables**: Alertas personalizables por tipo de métrica
+- **Múltiples Canales**: Notificaciones por email, Slack, Discord y Teams
+- **Cooldown Inteligente**: Prevención de spam de alertas
+- **Severidad Graduada**: Alertas críticas, altas, medias y bajas
+- **Resolución Manual**: Sistema para marcar alertas como resueltas
+
+### 🌐 Dashboard Web Interactivo
+- **Monitoreo en Tiempo Real**: Estado del sistema actualizado automáticamente
+- **API REST Completa**: Endpoints para todas las funcionalidades
+- **Visualizaciones Interactivas**: Gráficos con Plotly para análisis dinámico
+- **Responsive Design**: Accesible desde cualquier dispositivo
+- **Exportación Directa**: Descarga de datos en múltiples formatos
+
+### 📤 Exportación Multi-Formato
+- **Formatos Soportados**: CSV, Excel, JSON, HTML, XML, SQL, Parquet, ZIP
+- **Exportación Múltiple**: Varios formatos simultáneamente
+- **Optimización Automática**: Recomendaciones de formato según el tamaño de datos
+- **Hojas de Resumen**: Información estadística incluida en Excel
+- **Compresión ZIP**: Múltiples archivos empaquetados
+
 ### 🛠️ CLI Completa (`cli.py`)
 ```bash
 # Comandos disponibles
@@ -260,8 +281,14 @@ make metrics-export    # Exportar reporte de métricas
 make report-executive  # Generar resumen ejecutivo
 make report-analytics  # Generar reporte de análisis
 make report-metrics    # Generar reporte de métricas
+make alerts-list       # Listar alertas activas
+make alerts-summary    # Mostrar resumen de alertas
+make alerts-export     # Exportar alertas a archivo
+make export-csv        # Exportar datos a CSV
+make export-multiple   # Exportar datos en múltiples formatos
 make dashboard         # Mostrar dashboard en consola
 make dashboard-html    # Generar dashboard HTML
+make dashboard-web     # Iniciar dashboard web
 make notify-test       # Probar sistema de notificaciones
 ```
 
@@ -272,6 +299,14 @@ make notify-test       # Probar sistema de notificaciones
 ### 📈 Sistema de Métricas y Reportes (`utils/`)
 - **`metrics_collector.py`**: Recolección avanzada de métricas de rendimiento y calidad
 - **`report_generator.py`**: Generación automática de reportes ejecutivos y analíticos
+- **`alert_system.py`**: Sistema de alertas inteligentes con umbrales configurables
+- **`data_exporter.py`**: Exportación de datos en múltiples formatos (CSV, Excel, JSON, HTML, XML, SQL, Parquet)
+
+### 🌐 Dashboard Web Interactivo
+- **`web_dashboard.py`**: Dashboard web con Flask para monitoreo en tiempo real
+- **API REST**: Endpoints para métricas, alertas, datos y gráficos
+- **Visualizaciones**: Gráficos interactivos con Plotly
+- **Monitoreo**: Estado del sistema, alertas activas y métricas en tiempo real
 
 ### 📓 Notebook Mejorado (`notebooks/analisis.ipynb`)
 - **Validación automática**: Verificación de calidad de datos integrada
@@ -442,6 +477,86 @@ df_clean['dia_semana'].value_counts()
 ## 🤝 Contribuciones
 
 Las contribuciones son bienvenidas. Por favor:
+
+## 🆕 Funcionalidades Avanzadas v3.0
+
+### 🚨 Sistema de Alertas Inteligentes
+
+El sistema de alertas permite monitorear el rendimiento del scraper y recibir notificaciones automáticas cuando se detectan problemas.
+
+```bash
+# Gestionar alertas
+python cli.py alerts --list           # Listar alertas activas
+python cli.py alerts --summary        # Mostrar resumen de alertas
+python cli.py alerts --resolve 0      # Resolver alerta por ID
+python cli.py alerts --export alerts.json  # Exportar alertas
+
+# Comandos Makefile
+make alerts-list                       # Listar alertas activas
+make alerts-summary                    # Mostrar resumen de alertas
+make alerts-export                     # Exportar alertas a archivo
+```
+
+**Características:**
+- Umbrales configurables por tipo de métrica
+- Notificaciones por email, Slack, Discord y Teams
+- Sistema de cooldown para evitar spam
+- Alertas graduadas por severidad (crítica, alta, media, baja)
+
+### 📤 Exportación Multi-Formato
+
+Exporta tus datos en múltiples formatos para diferentes necesidades de análisis.
+
+```bash
+# Exportar en formato único
+python cli.py export --input data/proyectos_ley_2024-01-15.csv --format excel
+python cli.py export --input data/proyectos_ley_2024-01-15.csv --format json
+python cli.py export --input data/proyectos_ley_2024-01-15.csv --format html
+
+# Exportar en múltiples formatos
+python cli.py export --input data/proyectos_ley_2024-01-15.csv --multiple --formats csv excel json html
+
+# Comandos Makefile
+make export-csv                        # Exportar a CSV
+make export-multiple                   # Exportar en múltiples formatos
+```
+
+**Formatos soportados:**
+- **CSV**: Para análisis en Excel o herramientas de datos
+- **Excel**: Con hojas de resumen y formato profesional
+- **JSON**: Para integración con APIs y aplicaciones web
+- **HTML**: Reportes web con visualizaciones
+- **XML**: Para sistemas legacy y intercambio de datos
+- **SQL**: Scripts de inserción para bases de datos
+- **Parquet**: Formato optimizado para big data
+- **ZIP**: Múltiples formatos empaquetados
+
+### 🌐 Dashboard Web Interactivo
+
+Dashboard web completo para monitoreo en tiempo real del sistema.
+
+```bash
+# Iniciar dashboard web
+python cli.py dashboard --port 5000 --host 0.0.0.0
+
+# Comando Makefile
+make dashboard-web                     # Iniciar dashboard web en puerto 5000
+
+# Acceder al dashboard
+# http://localhost:5000 - Dashboard principal
+# http://localhost:5000/api/status - API de estado
+# http://localhost:5000/api/metrics - API de métricas
+# http://localhost:5000/api/alerts - API de alertas
+```
+
+**Características:**
+- Monitoreo en tiempo real del estado del sistema
+- Gráficos interactivos con Plotly
+- API REST completa para integración
+- Responsive design para móviles y tablets
+- Exportación directa de datos desde la interfaz
+
+## 🤝 Contribuir
 
 1. Fork el proyecto
 2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)

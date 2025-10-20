@@ -29,8 +29,14 @@ help:
 	@echo "  report-executive Generate executive summary report"
 	@echo "  report-analytics Generate analytics report"
 	@echo "  report-metrics  Generate metrics report"
+	@echo "  alerts-list     List active alerts"
+	@echo "  alerts-summary  Show alert summary"
+	@echo "  alerts-export   Export alerts to file"
+	@echo "  export-csv      Export data to CSV"
+	@echo "  export-multiple Export data in multiple formats"
 	@echo "  dashboard       Show dashboard in console"
 	@echo "  dashboard-html  Generate HTML dashboard"
+	@echo "  dashboard-web   Start web dashboard"
 	@echo "  notify-test     Test notification system"
 	@echo "  monitor        Monitor system performance"
 	@echo "  docs           Generate documentation"
@@ -148,6 +154,38 @@ report-analytics:
 report-metrics:
 	@echo "📊 Generating metrics report..."
 	python cli.py reports --type metrics
+
+alerts-list:
+	@echo "🚨 Listing active alerts..."
+	python cli.py alerts --list
+
+alerts-summary:
+	@echo "📊 Showing alert summary..."
+	python cli.py alerts --summary
+
+alerts-export:
+	@echo "📤 Exporting alerts..."
+	python cli.py alerts --export alerts_export_$(shell date +%Y%m%d_%H%M%S).json
+
+export-csv:
+	@echo "📤 Exporting data to CSV..."
+	@if [ -f "data/proyectos_ley_$(shell date +%Y-%m-%d).csv" ]; then \
+		python cli.py export --input data/proyectos_ley_$(shell date +%Y-%m-%d).csv --format csv; \
+	else \
+		echo "⚠️ No data file found. Run scraping first."; \
+	fi
+
+export-multiple:
+	@echo "📤 Exporting data in multiple formats..."
+	@if [ -f "data/proyectos_ley_$(shell date +%Y-%m-%d).csv" ]; then \
+		python cli.py export --input data/proyectos_ley_$(shell date +%Y-%m-%d).csv --multiple --formats csv excel json html; \
+	else \
+		echo "⚠️ No data file found. Run scraping first."; \
+	fi
+
+dashboard-web:
+	@echo "🌐 Starting web dashboard..."
+	python cli.py dashboard --port 5000
 
 dashboard:
 	@echo "📊 Generating dashboard..."

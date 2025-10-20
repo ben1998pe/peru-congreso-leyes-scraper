@@ -19,6 +19,8 @@ from utils.performance_monitor import PerformanceMonitor
 from utils.notifications import get_notification_manager
 from utils.metrics_collector import get_metrics_collector
 from utils.report_generator import get_report_generator
+from utils.alert_system import get_alert_system
+from utils.data_exporter import get_data_exporter
 from config.environment import env
 
 
@@ -118,6 +120,27 @@ Examples:
         reports_parser.add_argument('--type', choices=['executive', 'analytics', 'metrics'], required=True, help='Report type')
         reports_parser.add_argument('--input', '-i', type=str, help='Input data file')
         reports_parser.add_argument('--output', '-o', type=str, help='Output report file')
+        
+        # Alerts command
+        alerts_parser = subparsers.add_parser('alerts', help='Manage alert system')
+        alerts_parser.add_argument('--list', action='store_true', help='List active alerts')
+        alerts_parser.add_argument('--summary', action='store_true', help='Show alert summary')
+        alerts_parser.add_argument('--resolve', type=int, help='Resolve alert by ID')
+        alerts_parser.add_argument('--export', type=str, help='Export alerts to file')
+        alerts_parser.add_argument('--hours', type=int, default=24, help='Hours to analyze')
+        
+        # Export command
+        export_parser = subparsers.add_parser('export', help='Export data in multiple formats')
+        export_parser.add_argument('--input', '-i', type=str, required=True, help='Input data file')
+        export_parser.add_argument('--format', '-f', type=str, help='Export format (csv, excel, json, html, xml, sql, parquet, zip)')
+        export_parser.add_argument('--output', '-o', type=str, help='Output file')
+        export_parser.add_argument('--multiple', action='store_true', help='Export in multiple formats')
+        export_parser.add_argument('--formats', nargs='+', help='Formats for multiple export')
+        
+        # Dashboard command
+        dashboard_parser = subparsers.add_parser('dashboard', help='Start web dashboard')
+        dashboard_parser.add_argument('--port', type=int, default=5000, help='Port for web dashboard')
+        dashboard_parser.add_argument('--host', type=str, default='0.0.0.0', help='Host for web dashboard')
     
     def run(self, args=None):
         """Run the CLI"""
@@ -151,6 +174,12 @@ Examples:
                 return self.handle_metrics(parsed_args)
             elif parsed_args.command == 'reports':
                 return self.handle_reports(parsed_args)
+            elif parsed_args.command == 'alerts':
+                return self.handle_alerts(parsed_args)
+            elif parsed_args.command == 'export':
+                return self.handle_export(parsed_args)
+            elif parsed_args.command == 'dashboard':
+                return self.handle_dashboard_web(parsed_args)
             else:
                 self.logger.error(f"Unknown command: {parsed_args.command}")
                 return 1
@@ -556,6 +585,130 @@ Examples:
             return 0
         
         return 0
+    
+    def handle_alerts(self, args):
+        """Handle alerts command"""
+        alert_system = get_alert_system()
+        
+        if args.list:
+            self.logger.info("🚨 Listando alertas activas...")
+            active_alerts = alert_system.get_active_alerts()
+            
+            if not active_alerts:
+                self.logger.info("✅ No hay alertas activas")
+                return 0
+            
+            for i, alert in enumerate(active_alerts):
+                self.logger.info(f"  {i}. [{alert.severity.upper()}] {alert.message}")
+                self.logger.info(f"     Valor: {alert.value} | Umbral: {alert.threshold}")
+                self.logger.info(f"     Timestamp: {alert.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+                self.logger.info("")
+            
+            return 0
+        
+        elif args.summary:
+            self.logger.info("📊 Generando resumen de alertas...")
+            summary = alert_system.get_alert_summary(args.hours)
+            
+            self.logger.info(f"📈 RESUMEN DE ALERTAS (últimas {args.hours}h):")
+            self.logger.info(f"   Total de alertas: {summary.get('total_alerts', 0)}")
+            self.logger.info(f"   Alertas activas: {summary.get('active_alerts', 0)}")
+            
+            if summary.get('by_severity'):
+                self.logger.info("   Por severidad:")
+                for severity, count in summary['by_severity'].items():
+                    self.logger.info(f"     {severity.upper()}: {count}")
+            
+            if summary.get('by_rule'):
+                self.logger.info("   Por regla:")
+                for rule, count in summary['by_rule'].items():
+                    self.logger.info(f"     {rule}: {count}")
+            
+            return 0
+        
+        elif args.resolve is not None:
+            self.logger.info(f"🔧 Resolviendo alerta {args.resolve}...")
+            alert_system.resolve_alert(args.resolve)
+            self.logger.info("✅ Alerta resuelta")
+            return 0
+        
+        elif args.export:
+            self.logger.info(f"📤 Exportando alertas a {args.export}...")
+            export_file = alert_system.export_alerts(args.export)
+            self.logger.info(f"✅ Alertas exportadas: {export_file}")
+            return 0
+        
+        else:
+            self.logger.info("🚨 Comandos de alertas disponibles:")
+            self.logger.info("   --list      Listar alertas activas")
+            self.logger.info("   --summary   Mostrar resumen de alertas")
+            self.logger.info("   --resolve   Resolver alerta por ID")
+            self.logger.info("   --export    Exportar alertas a archivo")
+            self.logger.info("   --hours     Horas a analizar (default: 24)")
+            return 0
+    
+    def handle_export(self, args):
+        """Handle export command"""
+        data_exporter = get_data_exporter()
+        
+        try:
+            # Cargar datos
+            self.logger.info(f"📂 Cargando datos desde {args.input}...")
+            df = pd.read_csv(args.input, encoding='utf-8-sig')
+            
+            # Limpiar datos
+            from utils.limpieza import DataCleaner
+            cleaner = DataCleaner()
+            df_clean = cleaner.limpiar_dataframe(df)
+            
+            if args.multiple:
+                # Exportar en múltiples formatos
+                formats = args.formats or ['csv', 'excel', 'json', 'html']
+                self.logger.info(f"📤 Exportando en múltiples formatos: {', '.join(formats)}...")
+                
+                results = data_exporter.export_multiple_formats(df_clean, formats, args.output)
+                
+                self.logger.info("✅ Exportación completada:")
+                for format, result in results.items():
+                    if result.startswith('Error:'):
+                        self.logger.error(f"   ❌ {format.upper()}: {result}")
+                    else:
+                        self.logger.info(f"   ✅ {format.upper()}: {result}")
+                
+                return 0
+            
+            else:
+                # Exportar en formato único
+                if not args.format:
+                    self.logger.error("Se requiere especificar formato con --format")
+                    return 1
+                
+                self.logger.info(f"📤 Exportando en formato {args.format.upper()}...")
+                output_file = data_exporter.export_data(df_clean, args.format, args.output)
+                self.logger.info(f"✅ Datos exportados: {output_file}")
+                return 0
+        
+        except Exception as e:
+            self.logger.error(f"❌ Error en exportación: {e}")
+            return 1
+    
+    def handle_dashboard_web(self, args):
+        """Handle web dashboard command"""
+        self.logger.info("🌐 Iniciando dashboard web...")
+        self.logger.info(f"📊 Accede a: http://{args.host}:{args.port}")
+        self.logger.info("🔧 API disponible en: http://{args.host}:{args.port}/api/")
+        self.logger.info("⏹️  Presiona Ctrl+C para detener")
+        
+        try:
+            # Importar y ejecutar el dashboard web
+            import web_dashboard
+            web_dashboard.app.run(host=args.host, port=args.port, debug=False)
+        except KeyboardInterrupt:
+            self.logger.info("🛑 Dashboard detenido por el usuario")
+            return 0
+        except Exception as e:
+            self.logger.error(f"❌ Error iniciando dashboard: {e}")
+            return 1
     
     def _generate_html_report(self, resumen, output_file):
         """Generate HTML analysis report"""
