@@ -29,6 +29,7 @@ from utils.logging_config import get_logger, log_execution_time, PerformanceProf
 from utils.data_validator import DataValidator
 from utils.performance_monitor import PerformanceMonitor
 from utils.notifications import get_notification_manager
+from utils.metrics_collector import get_metrics_collector
 from config.environment import env
 
 
@@ -48,6 +49,7 @@ class EnhancedCongresoScraper:
         self.validator = DataValidator()
         self.performance_monitor = PerformanceMonitor() if enable_monitoring else None
         self.notification_manager = get_notification_manager()
+        self.metrics_collector = get_metrics_collector()
         
         # Configuration
         self.base_url = "https://wb2server.congreso.gob.pe/spley-portal/#/expediente/search"
@@ -222,6 +224,9 @@ class EnhancedCongresoScraper:
         if self.performance_monitor:
             self.performance_monitor.start_monitoring()
         
+        # Start metrics collection
+        session_id = self.metrics_collector.start_session()
+        
         try:
             # Check connection
             if not self._check_connection():
@@ -267,6 +272,14 @@ class EnhancedCongresoScraper:
             
             self.stats['end_time'] = datetime.now()
             self.stats['projects_found'] = len(proyectos)
+            
+            # Finalizar recolección de métricas
+            self.metrics_collector.end_session(
+                projects_found=len(proyectos),
+                pages_scraped=self.stats['pages_scraped'],
+                errors=self.stats['errors_encountered'],
+                retries=self.stats['retries_performed']
+            )
             
             # Notificar finalización de scraping
             duration = (self.stats['end_time'] - self.stats['start_time']).total_seconds()

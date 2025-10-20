@@ -24,6 +24,11 @@ help:
 	@echo "  analyze        Analyze scraped data"
 	@echo "  analyze-complete Run complete analysis pipeline"
 	@echo "  health-check    Run project health check"
+	@echo "  metrics-summary Show metrics summary"
+	@echo "  metrics-export  Export metrics report"
+	@echo "  report-executive Generate executive summary report"
+	@echo "  report-analytics Generate analytics report"
+	@echo "  report-metrics  Generate metrics report"
 	@echo "  dashboard       Show dashboard in console"
 	@echo "  dashboard-html  Generate HTML dashboard"
 	@echo "  notify-test     Test notification system"
@@ -119,6 +124,30 @@ analyze-complete:
 health-check:
 	@echo "🏥 Running project health check..."
 	python scripts/health_check.py
+
+metrics-summary:
+	@echo "📊 Showing metrics summary..."
+	python cli.py metrics --summary
+
+metrics-export:
+	@echo "📤 Exporting metrics report..."
+	python cli.py metrics --export metrics_report_$(shell date +%Y%m%d_%H%M%S).json
+
+report-executive:
+	@echo "📊 Generating executive summary..."
+	python cli.py reports --type executive
+
+report-analytics:
+	@echo "📊 Generating analytics report..."
+	@if [ -f "data/proyectos_ley_$(shell date +%Y-%m-%d).csv" ]; then \
+		python cli.py reports --type analytics --input data/proyectos_ley_$(shell date +%Y-%m-%d).csv; \
+	else \
+		echo "⚠️ No data file found. Run scraping first."; \
+	fi
+
+report-metrics:
+	@echo "📊 Generating metrics report..."
+	python cli.py reports --type metrics
 
 dashboard:
 	@echo "📊 Generating dashboard..."

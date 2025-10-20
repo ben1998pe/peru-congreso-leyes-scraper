@@ -209,6 +209,14 @@ resumen = cleaner.generar_resumen(df_limpio)
 - **Monitoreo de Rendimiento**: Seguimiento en tiempo real del rendimiento del sistema
 - **Logging Avanzado**: Sistema de logging con rotación de archivos y colores
 - **Múltiples Selectores**: Fallbacks automáticos para elementos de la página web
+- **Sistema de Métricas**: Recolección automática de métricas de rendimiento y calidad
+
+### 📊 Sistema de Métricas y Reportes
+- **Recolección Automática**: Métricas de sesiones, rendimiento y calidad de datos
+- **Análisis de Tendencias**: Seguimiento de patrones de uso y rendimiento
+- **Reportes Ejecutivos**: Generación automática de resúmenes para stakeholders
+- **Dashboard de Métricas**: Visualización en tiempo real del estado del sistema
+- **Exportación Avanzada**: Reportes en JSON, HTML y CSV para análisis externos
 
 ### 🛠️ CLI Completa (`cli.py`)
 ```bash
@@ -247,6 +255,11 @@ make quality           # Verificaciones de calidad de código
 make pipeline          # Pipeline completo de datos
 make analyze-complete  # Análisis completo automatizado
 make health-check      # Verificación de salud del proyecto
+make metrics-summary   # Mostrar resumen de métricas
+make metrics-export    # Exportar reporte de métricas
+make report-executive  # Generar resumen ejecutivo
+make report-analytics  # Generar reporte de análisis
+make report-metrics    # Generar reporte de métricas
 make dashboard         # Mostrar dashboard en consola
 make dashboard-html    # Generar dashboard HTML
 make notify-test       # Probar sistema de notificaciones
@@ -255,6 +268,10 @@ make notify-test       # Probar sistema de notificaciones
 ### 📊 Scripts de Análisis (`scripts/`)
 - **`run_analysis.py`**: Análisis completo automatizado con exportación de resultados
 - **`health_check.py`**: Verificación de salud del proyecto y estructura
+
+### 📈 Sistema de Métricas y Reportes (`utils/`)
+- **`metrics_collector.py`**: Recolección avanzada de métricas de rendimiento y calidad
+- **`report_generator.py`**: Generación automática de reportes ejecutivos y analíticos
 
 ### 📓 Notebook Mejorado (`notebooks/analisis.ipynb`)
 - **Validación automática**: Verificación de calidad de datos integrada

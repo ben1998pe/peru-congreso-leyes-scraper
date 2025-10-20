@@ -17,6 +17,8 @@ from utils.limpieza import DataCleaner, limpiar_archivo_csv
 from utils.logging_config import get_logger
 from utils.performance_monitor import PerformanceMonitor
 from utils.notifications import get_notification_manager
+from utils.metrics_collector import get_metrics_collector
+from utils.report_generator import get_report_generator
 from config.environment import env
 
 
@@ -104,6 +106,18 @@ Examples:
         notify_parser.add_argument('--test', action='store_true', help='Test notifications')
         notify_parser.add_argument('--enable', action='store_true', help='Enable notifications')
         notify_parser.add_argument('--disable', action='store_true', help='Disable notifications')
+        
+        # Metrics command
+        metrics_parser = subparsers.add_parser('metrics', help='View and manage metrics')
+        metrics_parser.add_argument('--summary', action='store_true', help='Show metrics summary')
+        metrics_parser.add_argument('--export', type=str, help='Export metrics report')
+        metrics_parser.add_argument('--days', type=int, default=7, help='Number of days to analyze')
+        
+        # Reports command
+        reports_parser = subparsers.add_parser('reports', help='Generate reports')
+        reports_parser.add_argument('--type', choices=['executive', 'analytics', 'metrics'], required=True, help='Report type')
+        reports_parser.add_argument('--input', '-i', type=str, help='Input data file')
+        reports_parser.add_argument('--output', '-o', type=str, help='Output report file')
     
     def run(self, args=None):
         """Run the CLI"""
@@ -133,6 +147,10 @@ Examples:
                 return self.handle_dashboard(parsed_args)
             elif parsed_args.command == 'notify':
                 return self.handle_notifications(parsed_args)
+            elif parsed_args.command == 'metrics':
+                return self.handle_metrics(parsed_args)
+            elif parsed_args.command == 'reports':
+                return self.handle_reports(parsed_args)
             else:
                 self.logger.error(f"Unknown command: {parsed_args.command}")
                 return 1
@@ -436,6 +454,108 @@ Examples:
                     self.logger.info("⚠️ No hay canales configurados")
             
             return 0
+    
+    def handle_metrics(self, args):
+        """Handle metrics command"""
+        metrics_collector = get_metrics_collector()
+        
+        if args.summary:
+            self.logger.info("📊 Generando resumen de métricas...")
+            summary = metrics_collector.get_session_summary(args.days)
+            quality_summary = metrics_collector.get_quality_summary(args.days)
+            
+            self.logger.info("📈 RESUMEN DE SESIONES:")
+            self.logger.info(f"   Período: {summary.get('period_days', 0)} días")
+            self.logger.info(f"   Sesiones totales: {summary.get('total_sessions', 0)}")
+            self.logger.info(f"   Proyectos extraídos: {summary.get('total_projects', 0)}")
+            self.logger.info(f"   Tasa de éxito promedio: {summary.get('average_success_rate', 0)}%")
+            self.logger.info(f"   Velocidad promedio: {summary.get('average_projects_per_minute', 0)} proyectos/min")
+            
+            self.logger.info("\n📊 RESUMEN DE CALIDAD:")
+            self.logger.info(f"   Registros totales: {quality_summary.get('total_records', 0)}")
+            self.logger.info(f"   Registros válidos: {quality_summary.get('valid_records', 0)}")
+            self.logger.info(f"   Completitud promedio: {quality_summary.get('average_completeness', 0)}%")
+            self.logger.info(f"   Precisión promedio: {quality_summary.get('average_accuracy', 0)}%")
+            self.logger.info(f"   Puntuación de calidad: {quality_summary.get('data_quality_score', 0)}%")
+            
+            return 0
+        
+        elif args.export:
+            self.logger.info(f"📤 Exportando reporte de métricas...")
+            report_file = metrics_collector.export_metrics_report(args.export)
+            self.logger.info(f"✅ Reporte exportado: {report_file}")
+            return 0
+        
+        else:
+            self.logger.info("📊 Comandos de métricas disponibles:")
+            self.logger.info("   --summary    Mostrar resumen de métricas")
+            self.logger.info("   --export     Exportar reporte de métricas")
+            self.logger.info("   --days       Número de días a analizar (default: 7)")
+            return 0
+    
+    def handle_reports(self, args):
+        """Handle reports command"""
+        report_generator = get_report_generator()
+        
+        if args.type == 'executive':
+            self.logger.info("📊 Generando resumen ejecutivo...")
+            
+            # Cargar datos si se proporciona archivo
+            if args.input:
+                try:
+                    df = pd.read_csv(args.input, encoding='utf-8-sig')
+                    from utils.limpieza import DataCleaner
+                    cleaner = DataCleaner()
+                    df_clean = cleaner.limpiar_dataframe(df)
+                    resumen = cleaner.generar_resumen(df_clean)
+                except Exception as e:
+                    self.logger.error(f"Error cargando datos: {e}")
+                    return 1
+            else:
+                # Usar datos de ejemplo
+                resumen = {
+                    'total_projects': 0,
+                    'parties': {},
+                    'project_types': {},
+                    'avg_authors': 0,
+                    'data_quality_score': 0
+                }
+            
+            report_file = report_generator.generate_executive_summary(resumen, args.output)
+            self.logger.info(f"✅ Resumen ejecutivo generado: {report_file}")
+            return 0
+        
+        elif args.type == 'analytics':
+            self.logger.info("📊 Generando reporte de análisis...")
+            
+            if not args.input:
+                self.logger.error("Se requiere archivo de entrada para reporte de análisis")
+                return 1
+            
+            try:
+                df = pd.read_csv(args.input, encoding='utf-8-sig')
+                report_file = report_generator.generate_analytics_report(df, args.output)
+                self.logger.info(f"✅ Reporte de análisis generado: {report_file}")
+                return 0
+            except Exception as e:
+                self.logger.error(f"Error generando reporte de análisis: {e}")
+                return 1
+        
+        elif args.type == 'metrics':
+            self.logger.info("📊 Generando reporte de métricas...")
+            
+            metrics_collector = get_metrics_collector()
+            session_summary = metrics_collector.get_session_summary()
+            quality_summary = metrics_collector.get_quality_summary()
+            
+            # Combinar métricas
+            metrics_data = {**session_summary, **quality_summary}
+            
+            report_file = report_generator.generate_metrics_report(metrics_data, args.output)
+            self.logger.info(f"✅ Reporte de métricas generado: {report_file}")
+            return 0
+        
+        return 0
     
     def _generate_html_report(self, resumen, output_file):
         """Generate HTML analysis report"""
