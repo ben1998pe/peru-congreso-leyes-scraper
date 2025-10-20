@@ -568,7 +568,7 @@ make dashboard-web                     # Iniciar dashboard web en puerto 5000
 
 Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
-## ✍️ Autor
+## ✍️ Autor(es)
 
 **Benjamin Oscco Arias**
 - GitHub: [@ben1998pe](https://github.com/ben1998pe)
