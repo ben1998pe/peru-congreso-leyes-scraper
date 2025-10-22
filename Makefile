@@ -23,6 +23,7 @@ help:
 	@echo "  validate       Validate data quality"
 	@echo "  analyze        Analyze scraped data"
 	@echo "  analyze-complete Run complete analysis pipeline"
+	@echo "  analyze-notebook Run interactive notebook analysis"
 	@echo "  health-check    Run project health check"
 	@echo "  metrics-summary Show metrics summary"
 	@echo "  metrics-export  Export metrics report"
@@ -126,6 +127,10 @@ analyze:
 analyze-complete:
 	@echo "📊 Running complete analysis..."
 	python scripts/run_analysis.py
+
+analyze-notebook:
+	@echo "📊 Running notebook analysis..."
+	python scripts/run_notebook_analysis.py
 
 health-check:
 	@echo "🏥 Running project health check..."
