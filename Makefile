@@ -38,6 +38,10 @@ help:
 	@echo "  dashboard       Show dashboard in console"
 	@echo "  dashboard-html  Generate HTML dashboard"
 	@echo "  dashboard-web   Start web dashboard"
+	@echo "  config-show     Show current configuration"
+	@echo "  config-export   Export configuration to file"
+	@echo "  config-reset    Reset configuration to defaults"
+	@echo "  config-env-template Create environment template"
 	@echo "  notify-test     Test notification system"
 	@echo "  monitor        Monitor system performance"
 	@echo "  docs           Generate documentation"
@@ -191,6 +195,22 @@ export-multiple:
 dashboard-web:
 	@echo "🌐 Starting web dashboard..."
 	python cli.py dashboard --port 5000
+
+config-show:
+	@echo "🔧 Showing current configuration..."
+	python cli.py config --show
+
+config-export:
+	@echo "📤 Exporting configuration..."
+	python cli.py config --export config_backup_$(shell date +%Y%m%d_%H%M%S).json
+
+config-reset:
+	@echo "🔄 Resetting configuration to defaults..."
+	python cli.py config --reset
+
+config-env-template:
+	@echo "📄 Creating environment template..."
+	python cli.py config --create-env
 
 dashboard:
 	@echo "📊 Generating dashboard..."

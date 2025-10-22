@@ -141,6 +141,16 @@ Examples:
         dashboard_parser = subparsers.add_parser('dashboard', help='Start web dashboard')
         dashboard_parser.add_argument('--port', type=int, default=5000, help='Port for web dashboard')
         dashboard_parser.add_argument('--host', type=str, default='0.0.0.0', help='Host for web dashboard')
+        
+        # Config command
+        config_parser = subparsers.add_parser('config', help='Manage dynamic configuration')
+        config_parser.add_argument('--show', action='store_true', help='Show current configuration')
+        config_parser.add_argument('--update', type=str, help='Update configuration (scraping, data, alerts, performance)')
+        config_parser.add_argument('--set', nargs=2, metavar=('KEY', 'VALUE'), help='Set specific configuration value')
+        config_parser.add_argument('--export', type=str, help='Export configuration to file')
+        config_parser.add_argument('--import', dest='import_file', type=str, help='Import configuration from file')
+        config_parser.add_argument('--reset', action='store_true', help='Reset to default configuration')
+        config_parser.add_argument('--create-env', action='store_true', help='Create environment template file')
     
     def run(self, args=None):
         """Run the CLI"""
@@ -180,6 +190,8 @@ Examples:
                 return self.handle_export(parsed_args)
             elif parsed_args.command == 'dashboard':
                 return self.handle_dashboard_web(parsed_args)
+            elif parsed_args.command == 'config':
+                return self.handle_config(parsed_args)
             else:
                 self.logger.error(f"Unknown command: {parsed_args.command}")
                 return 1
@@ -709,6 +721,124 @@ Examples:
         except Exception as e:
             self.logger.error(f"❌ Error iniciando dashboard: {e}")
             return 1
+    
+    def handle_config(self, args):
+        """Handle config command"""
+        from utils.dynamic_config import get_config_manager
+        
+        config_manager = get_config_manager()
+        
+        if args.show:
+            self.logger.info("📋 Mostrando configuración actual...")
+            summary = config_manager.get_config_summary()
+            
+            print("\n🔧 CONFIGURACIÓN ACTUAL:")
+            print("=" * 50)
+            
+            for section, config in summary.items():
+                if section not in ['config_file', 'last_updated']:
+                    print(f"\n📊 {section.upper()}:")
+                    for key, value in config.items():
+                        print(f"   {key}: {value}")
+            
+            return 0
+        
+        elif args.update:
+            self.logger.info(f"🔧 Actualizando configuración: {args.update}")
+            
+            if args.update == 'scraping':
+                print("Configuración de scraping disponible:")
+                print("  max_retries, retry_delay, page_load_timeout, headless, window_size, user_agent")
+                return 0
+            elif args.update == 'data':
+                print("Configuración de datos disponible:")
+                print("  output_format, encoding, include_metadata, validate_data, clean_data, backup_original")
+                return 0
+            elif args.update == 'alerts':
+                print("Configuración de alertas disponible:")
+                print("  enabled, email_enabled, slack_enabled, discord_enabled, error_threshold, success_threshold")
+                return 0
+            elif args.update == 'performance':
+                print("Configuración de rendimiento disponible:")
+                print("  monitor_enabled, memory_limit_mb, cpu_limit_percent, log_performance, profile_memory")
+                return 0
+            else:
+                self.logger.error(f"Sección de configuración no válida: {args.update}")
+                return 1
+        
+        elif args.set:
+            key, value = args.set
+            self.logger.info(f"🔧 Configurando {key} = {value}")
+            
+            # Intentar convertir el valor al tipo apropiado
+            try:
+                if value.lower() in ['true', 'false']:
+                    value = value.lower() == 'true'
+                elif value.isdigit():
+                    value = int(value)
+                elif '.' in value and value.replace('.', '').isdigit():
+                    value = float(value)
+            except:
+                pass  # Mantener como string
+            
+            # Actualizar configuración según la clave
+            if key.startswith('scraping.'):
+                config_key = key.split('.', 1)[1]
+                config_manager.update_scraping_config(**{config_key: value})
+            elif key.startswith('data.'):
+                config_key = key.split('.', 1)[1]
+                config_manager.update_data_config(**{config_key: value})
+            elif key.startswith('alerts.'):
+                config_key = key.split('.', 1)[1]
+                config_manager.update_alert_config(**{config_key: value})
+            elif key.startswith('performance.'):
+                config_key = key.split('.', 1)[1]
+                config_manager.update_performance_config(**{config_key: value})
+            else:
+                self.logger.error(f"Clave de configuración no válida: {key}")
+                return 1
+            
+            self.logger.info(f"✅ Configuración actualizada: {key} = {value}")
+            return 0
+        
+        elif args.export:
+            self.logger.info(f"📤 Exportando configuración a {args.export}...")
+            export_file = config_manager.export_config(args.export)
+            self.logger.info(f"✅ Configuración exportada: {export_file}")
+            return 0
+        
+        elif args.import_file:
+            self.logger.info(f"📥 Importando configuración desde {args.import_file}...")
+            success = config_manager.import_config(args.import_file)
+            if success:
+                self.logger.info("✅ Configuración importada exitosamente")
+                return 0
+            else:
+                self.logger.error("❌ Error importando configuración")
+                return 1
+        
+        elif args.reset:
+            self.logger.info("🔄 Reseteando configuración a valores por defecto...")
+            config_manager.reset_to_defaults()
+            self.logger.info("✅ Configuración reseteada")
+            return 0
+        
+        elif args.create_env:
+            self.logger.info("📄 Creando template de variables de entorno...")
+            config_manager.create_env_template()
+            self.logger.info("✅ Template creado en config/env.template")
+            return 0
+        
+        else:
+            self.logger.info("🔧 Comandos de configuración disponibles:")
+            self.logger.info("   --show         Mostrar configuración actual")
+            self.logger.info("   --update       Mostrar opciones de actualización")
+            self.logger.info("   --set KEY VALUE Configurar valor específico")
+            self.logger.info("   --export FILE  Exportar configuración")
+            self.logger.info("   --import FILE  Importar configuración")
+            self.logger.info("   --reset        Resetear a valores por defecto")
+            self.logger.info("   --create-env   Crear template de variables de entorno")
+            return 0
     
     def _generate_html_report(self, resumen, output_file):
         """Generate HTML analysis report"""
