@@ -10,7 +10,7 @@ Este proyecto extrae, limpia y analiza datos de los proyectos de ley presentados
 ## 🚀 Características Principales
 
 ### ✨ Versión 2.0 - Mejorada
-- **🚀 Scraping Avanzado**: Extracción automática con Selenium y BeautifulSoup con manejo robusto de errores
+- **🚀 Scraping Avanzado**: Extracción automática con Selenium y BeautifulSoup con manejo robusto de errores.
 - **🔍 Validación de Datos**: Sistema completo de validación y limpieza de datos
 - **📊 Monitoreo de Rendimiento**: Seguimiento en tiempo real del rendimiento del sistema
 - **🛠️ CLI Completa**: Interfaz de línea de comandos para todas las operaciones
@@ -568,7 +568,7 @@ make dashboard-web                     # Iniciar dashboard web en puerto 5000
 
 Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
-## ✍️ Autor
+## ✍️ Autor(es)
 
 **Benjamin Oscco Arias**
 - GitHub: [@ben1998pe](https://github.com/ben1998pe)
